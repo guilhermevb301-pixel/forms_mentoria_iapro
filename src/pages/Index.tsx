@@ -14,55 +14,126 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- Component: Text Shimmer ---
-interface TextShimmerProps {
-  children: string;
-  as?: React.ElementType;
+// --- Component: Typewriter ---
+interface TypewriterProps {
+  text: string | string[];
+  speed?: number;
+  initialDelay?: number;
+  waitTime?: number;
+  deleteSpeed?: number;
+  loop?: boolean;
   className?: string;
-  duration?: number;
-  spread?: number;
+  showCursor?: boolean;
+  hideCursorOnType?: boolean;
+  cursorChar?: string | React.ReactNode;
+  cursorAnimationVariants?: {
+    initial: any;
+    animate: any;
+  };
+  cursorClassName?: string;
 }
 
-function TextShimmer({
-  children,
-  as: Component = 'p',
+const Typewriter = ({
+  text,
+  speed = 80,
+  initialDelay = 0,
+  waitTime = 2000,
+  deleteSpeed = 50,
+  loop = true,
   className,
-  duration = 2,
-  spread = 2,
-}: TextShimmerProps) {
-  const MotionComponent = motion.create(Component as keyof JSX.IntrinsicElements);
+  showCursor = true,
+  hideCursorOnType = false,
+  cursorChar = "|",
+  cursorClassName = "ml-1",
+  cursorAnimationVariants = {
+    initial: { opacity: 0 },
+    animate: {
+      opacity: 1,
+      transition: {
+        duration: 0.01,
+        repeat: Infinity,
+        repeatDelay: 0.4,
+        repeatType: "reverse" as const,
+      },
+    },
+  },
+}: TypewriterProps) => {
+  const [displayText, setDisplayText] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [currentTextIndex, setCurrentTextIndex] = useState(0);
+  const texts = Array.isArray(text) ? text : [text];
 
-  const dynamicSpread = useMemo(() => {
-    return children.length * spread;
-  }, [children, spread]);
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    const currentText = texts[currentTextIndex];
+    const nextTextIndex = (currentTextIndex + 1) % texts.length;
+    const nextText = texts[nextTextIndex];
+
+    let commonPrefixLength = 0;
+    if (loop || currentTextIndex < texts.length - 1) {
+      let i = 0;
+      while (i < currentText.length && i < nextText.length && currentText[i] === nextText[i]) {
+        i++;
+      }
+      commonPrefixLength = i;
+    }
+
+    const startTyping = () => {
+      if (isDeleting) {
+        if (displayText.length <= commonPrefixLength && displayText === currentText.substring(0, displayText.length)) {
+          setIsDeleting(false);
+          if (currentTextIndex === texts.length - 1 && !loop) return;
+          setCurrentTextIndex(nextTextIndex);
+          setCurrentIndex(commonPrefixLength);
+          timeout = setTimeout(() => {}, waitTime);
+        } else {
+          timeout = setTimeout(() => {
+            setDisplayText((prev) => prev.slice(0, -1));
+          }, deleteSpeed);
+        }
+      } else {
+        if (currentIndex < currentText.length) {
+          timeout = setTimeout(() => {
+            setDisplayText((prev) => prev + currentText[currentIndex]);
+            setCurrentIndex((prev) => prev + 1);
+          }, speed);
+        } else if (texts.length > 1) {
+          timeout = setTimeout(() => {
+            setIsDeleting(true);
+          }, waitTime);
+        }
+      }
+    };
+
+    if (currentIndex === 0 && !isDeleting && displayText === "" && initialDelay > 0) {
+      timeout = setTimeout(startTyping, initialDelay);
+    } else {
+      startTyping();
+    }
+
+    return () => clearTimeout(timeout);
+  }, [currentIndex, displayText, isDeleting, speed, deleteSpeed, waitTime, texts, currentTextIndex, loop]);
 
   return (
-    <MotionComponent
-      className={cn(
-        'relative inline-block bg-[length:250%_100%,auto] bg-clip-text',
-        'text-transparent [--base-color:#a1a1aa] [--base-gradient-color:#000]',
-        '[--bg:linear-gradient(90deg,#0000_calc(50%-var(--spread)),var(--base-gradient-color),#0000_calc(50%+var(--spread)))] [background-repeat:no-repeat,padding-box]',
-        'dark:[--base-color:#71717a] dark:[--base-gradient-color:#ffffff] dark:[--bg:linear-gradient(90deg,#0000_calc(50%-var(--spread)),var(--base-gradient-color),#0000_calc(50%+var(--spread)))]',
-        className
+    <div className={`inline whitespace-pre-wrap tracking-tight ${className}`}>
+      <span>{displayText}</span>
+      {showCursor && (
+        <motion.span
+          variants={cursorAnimationVariants}
+          className={cn(
+            cursorClassName,
+            hideCursorOnType && (currentIndex < texts[currentTextIndex].length || isDeleting) ? "hidden" : ""
+          )}
+          initial="initial"
+          animate="animate"
+        >
+          {cursorChar}
+        </motion.span>
       )}
-      initial={{ backgroundPosition: '100% center' }}
-      animate={{ backgroundPosition: '0% center' }}
-      transition={{
-        repeat: Infinity,
-        duration,
-        ease: 'linear',
-      }}
-      style={
-        {
-          '--spread': `${dynamicSpread}px`,
-          backgroundImage: `var(--bg), linear-gradient(var(--base-color), var(--base-color))`,
-        } as React.CSSProperties
-      }
-    >
-      {children}
-    </MotionComponent>
+    </div>
   );
-}
+};
 
 // --- Subcomponent: 3D Rotating Globe ---
 const WorldGlobe = () => {
@@ -267,38 +338,25 @@ const InfiniteGridHero = () => {
         </motion.div>
 
         <div className="mt-2 max-w-2xl mx-auto">
-          <TextShimmer 
-            className="text-lg md:text-2xl leading-relaxed [--base-color:#6b7280] [--base-gradient-color:#ffffff] dark:[--base-color:#6b7280] dark:[--base-gradient-color:#ffffff]" 
-            duration={3}
-          >
-            seu negócio rodando 24 horas.
-          </TextShimmer>
+          <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white whitespace-nowrap flex items-center justify-center gap-2 md:gap-4">
+            <Typewriter
+              text={[
+                "Suas vendas",
+                "Sua operação",
+                "Seu suporte",
+                "Seu negócio"
+              ]}
+              speed={100}
+              className="text-[#4F46E5]"
+              waitTime={2000}
+              deleteSpeed={50}
+              cursorChar={"_"}
+            />
+            <span className="text-white">
+              rodando 24 horas.
+            </span>
+          </h1>
         </div>
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="flex flex-col sm:flex-row gap-4 pointer-events-auto mt-8"
-        >
-          <button 
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-            className="group relative px-8 py-4 bg-[#4F46E5] text-white font-semibold rounded-full hover:bg-[#4338ca] transition-all shadow-[0_0_40px_-10px_rgba(79,70,229,0.5)] hover:shadow-[0_0_60px_-15px_rgba(79,70,229,0.6)] active:scale-95 flex items-center justify-center gap-2 overflow-hidden"
-          >
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-            <BrainCircuit className="w-5 h-5" />
-            <span>Começar Agora</span>
-            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
-          
-          <button 
-            className="px-8 py-4 bg-transparent text-white font-semibold rounded-full border border-white/20 hover:bg-[#00E3A5]/10 hover:border-[#00E3A5]/50 transition-all active:scale-95 flex items-center justify-center gap-2"
-          >
-            <Bot className="w-5 h-5 text-[#00E3A5]" />
-            <span>Agendar Demo</span>
-          </button>
-        </motion.div>
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#EA4B71]/50 to-transparent" />
