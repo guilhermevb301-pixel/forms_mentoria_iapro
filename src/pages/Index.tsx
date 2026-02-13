@@ -7,7 +7,7 @@ import {
 } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { Bot, ArrowRight, BrainCircuit, Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
 
 // --- Utility for Tailwind classes ---
 function cn(...inputs: ClassValue[]) {
@@ -134,6 +134,132 @@ const Typewriter = ({
     </div>
   );
 };
+
+// --- Component: HoverButton ---
+interface HoverButtonProps extends React.HTMLAttributes<HTMLDivElement> {
+  children: React.ReactNode;
+}
+
+const HoverButton = React.forwardRef<HTMLDivElement, HoverButtonProps>(
+  ({ className, children, ...props }, ref) => {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const [isListening, setIsListening] = useState(false);
+    const [circles, setCircles] = useState<Array<{
+      id: number;
+      x: number;
+      y: number;
+      color: string;
+      fadeState: "in" | "out" | null;
+    }>>([]);
+    const lastAddedRef = useRef(0);
+
+    const createCircle = React.useCallback((x: number, y: number) => {
+      const buttonWidth = containerRef.current?.offsetWidth || 0;
+      const xPos = x / buttonWidth;
+      const color = `linear-gradient(to right, var(--circle-start) ${xPos * 100}%, var(--circle-end) ${xPos * 100}%)`;
+      setCircles((prev) => [
+        ...prev,
+        { id: Date.now(), x, y, color, fadeState: null },
+      ]);
+    }, []);
+
+    const handlePointerMove = React.useCallback(
+      (event: React.PointerEvent<HTMLDivElement>) => {
+        if (!isListening) return;
+        const currentTime = Date.now();
+        if (currentTime - lastAddedRef.current > 50) {
+          lastAddedRef.current = currentTime;
+          const rect = event.currentTarget.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const y = event.clientY - rect.top;
+          createCircle(x, y);
+        }
+      },
+      [isListening, createCircle]
+    );
+
+    const handlePointerEnter = React.useCallback(() => {
+      setIsListening(true);
+    }, []);
+
+    const handlePointerLeave = React.useCallback(() => {
+      setIsListening(false);
+    }, []);
+
+    useEffect(() => {
+      circles.forEach((circle) => {
+        if (!circle.fadeState) {
+          setTimeout(() => {
+            setCircles((prev) =>
+              prev.map((c) =>
+                c.id === circle.id ? { ...c, fadeState: "in" } : c
+              )
+            );
+          }, 0);
+          setTimeout(() => {
+            setCircles((prev) =>
+              prev.map((c) =>
+                c.id === circle.id ? { ...c, fadeState: "out" } : c
+              )
+            );
+          }, 1000);
+          setTimeout(() => {
+            setCircles((prev) => prev.filter((c) => c.id !== circle.id));
+          }, 2200);
+        }
+      });
+    }, [circles]);
+
+    return (
+      <div
+        ref={containerRef}
+        className={cn(
+          "relative isolate px-10 py-4 rounded-full",
+          "text-white font-medium text-lg leading-6 tracking-wide",
+          "backdrop-blur-xl bg-[rgba(43,55,80,0.2)]",
+          "overflow-hidden transition-all duration-300",
+          "cursor-default select-none",
+          "before:content-[''] before:absolute before:inset-0",
+          "before:rounded-[inherit] before:pointer-events-none",
+          "before:z-[1]",
+          "before:shadow-[inset_0_0_0_1px_rgba(170,202,255,0.2),inset_0_0_16px_0_rgba(170,202,255,0.1),inset_0_-3px_12px_0_rgba(170,202,255,0.15),0_1px_3px_0_rgba(0,0,0,0.50),0_4px_12px_0_rgba(0,0,0,0.45)]",
+          "before:mix-blend-multiply before:transition-transform before:duration-300",
+          className
+        )}
+        onPointerMove={handlePointerMove}
+        onPointerEnter={handlePointerEnter}
+        onPointerLeave={handlePointerLeave}
+        {...props}
+        style={{
+          "--circle-start": "#a0d9f8",
+          "--circle-end": "#3a5bbf",
+        } as React.CSSProperties}
+      >
+        <span className="absolute inset-0 z-[-1] overflow-hidden rounded-[inherit] pointer-events-none">
+          {circles.map(({ id, x, y, color, fadeState }) => (
+            <div
+              key={id}
+              className={cn(
+                "absolute w-4 h-4 -translate-x-1/2 -translate-y-1/2 rounded-full",
+                "blur-md transition-opacity duration-300",
+                fadeState === "in" && "opacity-75",
+                fadeState === "out" && "opacity-0 duration-[1.2s]",
+                !fadeState && "opacity-0"
+              )}
+              style={{
+                left: x,
+                top: y,
+                background: color,
+              }}
+            />
+          ))}
+        </span>
+        {children}
+      </div>
+    );
+  }
+);
+HoverButton.displayName = "HoverButton";
 
 // --- Subcomponent: 3D Rotating Globe ---
 const WorldGlobe = () => {
@@ -337,8 +463,8 @@ const InfiniteGridHero = () => {
           </div>
         </motion.div>
 
-        <div className="mt-2 max-w-2xl mx-auto">
-          <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl font-normal tracking-tight text-white whitespace-nowrap flex items-center justify-center gap-2 md:gap-4">
+        <div className="mt-2 max-w-[600px] mx-auto">
+          <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-normal tracking-tight text-white whitespace-nowrap flex items-center justify-center gap-2 md:gap-3">
             <Typewriter
               text={[
                 "Suas vendas",
@@ -357,6 +483,17 @@ const InfiniteGridHero = () => {
             </span>
           </h1>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="pointer-events-auto"
+        >
+          <HoverButton>
+            Lançamento em breve
+          </HoverButton>
+        </motion.div>
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#EA4B71]/50 to-transparent" />
