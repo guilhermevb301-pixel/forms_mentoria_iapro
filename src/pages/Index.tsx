@@ -351,7 +351,7 @@ const WorldGlobe = () => {
     }
   }, []);
 
-  return <canvas ref={canvasRef} className="w-full h-full absolute inset-0 pointer-events-none opacity-[0.3]" />;
+  return <canvas ref={canvasRef} className="w-full h-full absolute inset-0 pointer-events-none opacity-[0.55]" style={{ filter: "drop-shadow(0 0 40px rgba(79, 70, 229, 0.15))" }} />;
 }
 
 // --- Subcomponent: The Grid Pattern SVG ---
@@ -418,7 +418,7 @@ const InfiniteGridHero = () => {
         "relative w-full h-screen flex flex-col items-center justify-center overflow-hidden bg-black text-white selection:bg-[#00E3A5]/30"
       )}
     >
-      <div className="absolute inset-0 z-0 flex items-center justify-center">
+      <div className="absolute inset-0 z-[1] flex items-center justify-center">
         <WorldGlobe />
       </div>
 
@@ -464,7 +464,7 @@ const InfiniteGridHero = () => {
         </motion.div>
 
         <div className="mt-2 max-w-[600px] mx-auto">
-          <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-normal tracking-tight text-white whitespace-nowrap flex items-center justify-center gap-2 md:gap-3">
+          <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-mono font-normal tracking-tight text-white whitespace-nowrap flex items-center justify-center gap-2 md:gap-3">
             <Typewriter
               text={[
                 "Suas vendas",
