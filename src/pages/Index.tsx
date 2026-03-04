@@ -1,13 +1,18 @@
 import React, { useState, useRef, useEffect, useMemo, type JSX } from "react";
-import { 
-  motion, 
-  useMotionValue, 
-  useMotionTemplate, 
-  useAnimationFrame 
+import {
+  motion,
+  useMotionValue,
+  useMotionTemplate,
+  useAnimationFrame,
+  AnimatePresence,
+  type MotionValue,
+  type Variants,
+  type HTMLMotionProps
 } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { Image as ImageIcon } from "lucide-react";
+import { OnboardingForm } from "../components/OnboardingForm";
 
 // --- Utility for Tailwind classes ---
 function cn(...inputs: ClassValue[]) {
@@ -26,10 +31,7 @@ interface TypewriterProps {
   showCursor?: boolean;
   hideCursorOnType?: boolean;
   cursorChar?: string | React.ReactNode;
-  cursorAnimationVariants?: {
-    initial: any;
-    animate: any;
-  };
+  cursorAnimationVariants?: Variants;
   cursorClassName?: string;
 }
 
@@ -86,7 +88,7 @@ const Typewriter = ({
           if (currentTextIndex === texts.length - 1 && !loop) return;
           setCurrentTextIndex(nextTextIndex);
           setCurrentIndex(commonPrefixLength);
-          timeout = setTimeout(() => {}, waitTime);
+          timeout = setTimeout(() => { }, waitTime);
         } else {
           timeout = setTimeout(() => {
             setDisplayText((prev) => prev.slice(0, -1));
@@ -136,126 +138,29 @@ const Typewriter = ({
 };
 
 // --- Component: HoverButton ---
-interface HoverButtonProps extends React.HTMLAttributes<HTMLDivElement> {
+interface HoverButtonProps extends HTMLMotionProps<"div"> {
   children: React.ReactNode;
 }
 
 const HoverButton = React.forwardRef<HTMLDivElement, HoverButtonProps>(
   ({ className, children, ...props }, ref) => {
-    const containerRef = useRef<HTMLDivElement>(null);
-    const [isListening, setIsListening] = useState(false);
-    const [circles, setCircles] = useState<Array<{
-      id: number;
-      x: number;
-      y: number;
-      color: string;
-      fadeState: "in" | "out" | null;
-    }>>([]);
-    const lastAddedRef = useRef(0);
-
-    const createCircle = React.useCallback((x: number, y: number) => {
-      const buttonWidth = containerRef.current?.offsetWidth || 0;
-      const xPos = x / buttonWidth;
-      const color = `linear-gradient(to right, var(--circle-start) ${xPos * 100}%, var(--circle-end) ${xPos * 100}%)`;
-      setCircles((prev) => [
-        ...prev,
-        { id: Date.now(), x, y, color, fadeState: null },
-      ]);
-    }, []);
-
-    const handlePointerMove = React.useCallback(
-      (event: React.PointerEvent<HTMLDivElement>) => {
-        if (!isListening) return;
-        const currentTime = Date.now();
-        if (currentTime - lastAddedRef.current > 50) {
-          lastAddedRef.current = currentTime;
-          const rect = event.currentTarget.getBoundingClientRect();
-          const x = event.clientX - rect.left;
-          const y = event.clientY - rect.top;
-          createCircle(x, y);
-        }
-      },
-      [isListening, createCircle]
-    );
-
-    const handlePointerEnter = React.useCallback(() => {
-      setIsListening(true);
-    }, []);
-
-    const handlePointerLeave = React.useCallback(() => {
-      setIsListening(false);
-    }, []);
-
-    useEffect(() => {
-      circles.forEach((circle) => {
-        if (!circle.fadeState) {
-          setTimeout(() => {
-            setCircles((prev) =>
-              prev.map((c) =>
-                c.id === circle.id ? { ...c, fadeState: "in" } : c
-              )
-            );
-          }, 0);
-          setTimeout(() => {
-            setCircles((prev) =>
-              prev.map((c) =>
-                c.id === circle.id ? { ...c, fadeState: "out" } : c
-              )
-            );
-          }, 1000);
-          setTimeout(() => {
-            setCircles((prev) => prev.filter((c) => c.id !== circle.id));
-          }, 2200);
-        }
-      });
-    }, [circles]);
-
     return (
-      <div
-        ref={containerRef}
+      <motion.div
+        ref={ref}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         className={cn(
           "relative isolate px-10 py-4 rounded-full",
           "text-white font-medium text-lg leading-6 tracking-wide",
-          "backdrop-blur-xl bg-[rgba(43,55,80,0.2)]",
+          "backdrop-blur-xl bg-white/5 border border-white/10",
           "overflow-hidden transition-all duration-300",
-          "cursor-default select-none",
-          "before:content-[''] before:absolute before:inset-0",
-          "before:rounded-[inherit] before:pointer-events-none",
-          "before:z-[1]",
-          "before:shadow-[inset_0_0_0_1px_rgba(170,202,255,0.2),inset_0_0_16px_0_rgba(170,202,255,0.1),inset_0_-3px_12px_0_rgba(170,202,255,0.15),0_1px_3px_0_rgba(0,0,0,0.50),0_4px_12px_0_rgba(0,0,0,0.45)]",
-          "before:mix-blend-multiply before:transition-transform before:duration-300",
+          "cursor-pointer select-none shadow-lg hover:bg-white/10 hover:shadow-xl",
           className
         )}
-        onPointerMove={handlePointerMove}
-        onPointerEnter={handlePointerEnter}
-        onPointerLeave={handlePointerLeave}
         {...props}
-        style={{
-          "--circle-start": "#a0d9f8",
-          "--circle-end": "#3a5bbf",
-        } as React.CSSProperties}
       >
-        <span className="absolute inset-0 z-[-1] overflow-hidden rounded-[inherit] pointer-events-none">
-          {circles.map(({ id, x, y, color, fadeState }) => (
-            <div
-              key={id}
-              className={cn(
-                "absolute w-4 h-4 -translate-x-1/2 -translate-y-1/2 rounded-full",
-                "blur-md transition-opacity duration-300",
-                fadeState === "in" && "opacity-75",
-                fadeState === "out" && "opacity-0 duration-[1.2s]",
-                !fadeState && "opacity-0"
-              )}
-              style={{
-                left: x,
-                top: y,
-                background: color,
-              }}
-            />
-          ))}
-        </span>
         {children}
-      </div>
+      </motion.div>
     );
   }
 );
@@ -268,7 +173,7 @@ const WorldGlobe = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true }); // optimize
     if (!ctx) return;
 
     let width = 0;
@@ -276,86 +181,124 @@ const WorldGlobe = () => {
     let animationFrameId: number;
     let rotation = 0;
 
+    let GLOBE_RADIUS = 320;
+
     const resize = () => {
       width = canvas.width = canvas.offsetWidth;
       height = canvas.height = canvas.offsetHeight;
+      // Responsive radius
+      if (width < 768) {
+        GLOBE_RADIUS = 200;
+      } else {
+        GLOBE_RADIUS = 320;
+      }
     };
     window.addEventListener("resize", resize);
     resize();
 
-    const GLOBE_RADIUS = 320; 
-    const color = "rgba(255, 255, 255, 0.2)"; 
-    const speed = 0.002; 
+    const speed = 0.002;
 
     const draw = () => {
       ctx.clearRect(0, 0, width, height);
       rotation += speed;
-      
+
       const cx = width / 2;
       const cy = height / 2;
 
-      ctx.strokeStyle = color;
+      // Draw subtle rim for the globe
+      ctx.beginPath();
+      ctx.arc(cx, cy, GLOBE_RADIUS, 0, 2 * Math.PI);
+
+      // Transparent fill to see background
+      ctx.fillStyle = "transparent";
+      ctx.fill();
+
+      // Light stroke for the rim with a glow
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+      ctx.lineWidth = 1;
+
+      // Specific shadow for the rim
+      ctx.shadowColor = "rgba(220, 220, 220, 0.35)";
+      ctx.shadowBlur = 80;
+      ctx.stroke();
+
+      // Reset shadow for inner lines
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = "transparent";
+
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
       ctx.lineWidth = 1.5;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-      
+
       ctx.beginPath();
 
+      // Reduced number of lines for performance
       for (let i = 0; i < 12; i++) {
-        const lng = (Math.PI * 2 * i) / 12; 
-        for (let j = 0; j <= 60; j++) {
-            const lat = (Math.PI * j) / 60; 
-            const x = GLOBE_RADIUS * Math.sin(lat) * Math.cos(lng + rotation);
-            const z = GLOBE_RADIUS * Math.sin(lat) * Math.sin(lng + rotation);
-            const y = GLOBE_RADIUS * Math.cos(lat);
-            
-            const perspective = 800;
-            const scale = perspective / (perspective - z);
-            
-            const px = cx + x * scale;
-            const py = cy + y * scale;
-            
-            if (j === 0) ctx.moveTo(px, py);
-            else ctx.lineTo(px, py);
+        const lng = (Math.PI * 2 * i) / 12;
+        // Reduced segments per line (was 60, now 40)
+        for (let j = 0; j <= 40; j++) {
+          const lat = (Math.PI * j) / 40;
+          const x = GLOBE_RADIUS * Math.sin(lat) * Math.cos(lng + rotation);
+          const z = GLOBE_RADIUS * Math.sin(lat) * Math.sin(lng + rotation);
+          const y = GLOBE_RADIUS * Math.cos(lat);
+
+          const perspective = 800;
+          const scale = perspective / (perspective - z);
+
+          const px = cx + x * scale;
+          const py = cy + y * scale;
+
+          if (j === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
         }
       }
-      
-       for (let i = 1; i < 8; i++) {
+
+      for (let i = 1; i < 8; i++) {
         const lat = (Math.PI * i) / 8;
-        for (let j = 0; j <= 60; j++) {
-            const lng = (Math.PI * 2 * j) / 60; 
-            const x = GLOBE_RADIUS * Math.sin(lat) * Math.cos(lng + rotation);
-            const z = GLOBE_RADIUS * Math.sin(lat) * Math.sin(lng + rotation);
-            const y = GLOBE_RADIUS * Math.cos(lat);
+        for (let j = 0; j <= 40; j++) {
+          const lng = (Math.PI * 2 * j) / 40;
+          const x = GLOBE_RADIUS * Math.sin(lat) * Math.cos(lng + rotation);
+          const z = GLOBE_RADIUS * Math.sin(lat) * Math.sin(lng + rotation);
+          const y = GLOBE_RADIUS * Math.cos(lat);
 
-            const perspective = 800;
-            const scale = perspective / (perspective - z);
+          const perspective = 800;
+          const scale = perspective / (perspective - z);
 
-            const px = cx + x * scale;
-            const py = cy + y * scale;
-            
-             if (j === 0) ctx.moveTo(px, py);
-            else ctx.lineTo(px, py);
+          const px = cx + x * scale;
+          const py = cy + y * scale;
+
+          if (j === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
         }
       }
-      
+
       ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = "transparent";
+
       animationFrameId = requestAnimationFrame(draw);
     };
 
     draw();
 
     return () => {
-        window.removeEventListener("resize", resize);
-        cancelAnimationFrame(animationFrameId);
+      window.removeEventListener("resize", resize);
+      cancelAnimationFrame(animationFrameId);
     }
   }, []);
 
-  return <canvas ref={canvasRef} className="w-full h-full absolute inset-0 pointer-events-none opacity-[0.55]" style={{ filter: "drop-shadow(0 0 40px rgba(79, 70, 229, 0.15))" }} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      className="w-full h-full absolute inset-0 pointer-events-none opacity-[0.8]"
+    // Removed drop-shadow filter for performance
+    />
+  );
 }
 
 // --- Subcomponent: The Grid Pattern SVG ---
-const GridPattern = ({ offsetX, offsetY }: { offsetX: any; offsetY: any }) => {
+const GridPattern = ({ offsetX, offsetY }: { offsetX: MotionValue<number>; offsetY: MotionValue<number> }) => {
   return (
     <svg className="w-full h-full">
       <defs>
@@ -372,7 +315,7 @@ const GridPattern = ({ offsetX, offsetY }: { offsetX: any; offsetY: any }) => {
             fill="none"
             stroke="currentColor"
             strokeWidth="1"
-            className="text-white/10" 
+            className="text-white/10"
           />
         </motion.pattern>
       </defs>
@@ -381,10 +324,12 @@ const GridPattern = ({ offsetX, offsetY }: { offsetX: any; offsetY: any }) => {
   );
 };
 
-// --- Main Component: Infinite Grid Hero ---
+// --- Main Component: InfiniteGridHero ---
 const InfiniteGridHero = () => {
-  const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // State for onboarding flow: 'idle' | 'animating' | 'completed'
+  const [onboardingState, setOnboardingState] = useState<'idle' | 'animating' | 'completed'>('idle');
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -398,7 +343,7 @@ const InfiniteGridHero = () => {
   const gridOffsetX = useMotionValue(0);
   const gridOffsetY = useMotionValue(0);
 
-  const speedX = 0.5; 
+  const speedX = 0.5;
   const speedY = 0.5;
 
   useAnimationFrame(() => {
@@ -408,7 +353,14 @@ const InfiniteGridHero = () => {
     gridOffsetY.set((currentY + speedY) % 40);
   });
 
-  const maskImage = useMotionTemplate`radial-gradient(350px circle at ${mouseX}px ${mouseY}px, black, transparent)`;
+  const maskImage = useMotionTemplate`radial-gradient(350px circle at ${mouseX}px ${mouseY}px, black, transparent), radial-gradient(450px circle at 50% 50%, black, transparent)`;
+
+  const startOnboarding = () => {
+    setOnboardingState('animating');
+    setTimeout(() => {
+      setOnboardingState('completed');
+    }, 800);
+  };
 
   return (
     <div
@@ -418,83 +370,129 @@ const InfiniteGridHero = () => {
         "relative w-full h-screen flex flex-col items-center justify-center overflow-hidden bg-black text-white selection:bg-[#00E3A5]/30"
       )}
     >
-      <div className="absolute inset-0 z-[1] flex items-center justify-center">
-        <WorldGlobe />
-      </div>
-
-      <div className="absolute inset-0 z-0 opacity-[0.2]">
-        <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
-      </div>
-
-      <motion.div 
-        className="absolute inset-0 z-0 opacity-100"
-        style={{ maskImage, WebkitMaskImage: maskImage }}
+      {/* Globe Container */}
+      <motion.div
+        className="absolute inset-0 z-[1] flex items-center justify-center pointer-events-none"
+        // Force GPU layer and hint transformation changes
+        style={{ transform: "translateZ(0)", willChange: "transform" }}
+        animate={onboardingState === 'animating' ? {
+          scale: 25,
+          rotate: 180,
+          opacity: 0
+        } : (onboardingState === 'completed' ? { opacity: 0 } : { scale: 1, rotate: 0, opacity: 1 })}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-[#00E3A5]/10 to-transparent backdrop-blur-[1px]" />
-        <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
+        <WorldGlobe />
       </motion.div>
 
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute right-[-10%] top-[-20%] w-[600px] h-[600px] rounded-full bg-[#4F46E5]/20 blur-[120px]" />
-        <div className="absolute left-[-10%] bottom-[-20%] w-[600px] h-[600px] rounded-full bg-[#EA4B71]/15 blur-[120px]" />
-      </div>
-
-      <div className="relative z-10 flex flex-col items-center text-center px-4 max-w-5xl mx-auto space-y-10 pointer-events-none">
-        
-        <motion.div
-           initial={{ opacity: 0, scale: 0.9 }}
-           animate={{ opacity: 1, scale: 1 }}
-           transition={{ duration: 0.5, delay: 0.1 }}
-           className="relative w-full max-w-[600px] flex items-center justify-center select-none"
-        >
-          <img 
-            src="https://baserow-backend-production20240528124524339000000001.s3.amazonaws.com/user_files/Y5iRKwRvsN8r6JPbfg9uYBKQubWLPGRE_68c04b12b8899acf17980aa95717ded2f6a8eabb863b26227daad00f8da7a097.svg" 
-            alt="ia4business Logo"
-            className="w-full h-auto object-contain drop-shadow-2xl"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.parentElement?.classList.add('fallback-visible');
-            }}
-          />
-          
-          <div className="hidden fallback-visible:flex flex-col items-center justify-center border-2 border-dashed border-white/20 rounded-xl p-12 bg-white/5 backdrop-blur-sm w-full">
-            <ImageIcon className="w-16 h-16 text-white/40 mb-4" />
-            <p className="text-white/60 font-mono text-sm">Logo não carregada</p>
-          </div>
-        </motion.div>
-
-        <div className="mt-2 max-w-[600px] mx-auto">
-          <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-mono font-normal tracking-tight text-white whitespace-nowrap flex items-center justify-center gap-2 md:gap-3">
-            <Typewriter
-              text={[
-                "Suas vendas",
-                "Sua operação",
-                "Seu suporte",
-                "Seu negócio"
-              ]}
-              speed={100}
-              className="text-[#4F46E5]"
-              waitTime={2000}
-              deleteSpeed={50}
-              cursorChar={"_"}
-            />
-            <span className="text-white">
-              rodando 24 horas.
-            </span>
-          </h1>
+      {/* Grid Background Layers */}
+      <motion.div
+        className="absolute inset-0 z-0"
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="absolute inset-0 z-0 opacity-[0.4]">
+          <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-          className="pointer-events-auto"
+          className="absolute inset-0 z-0 opacity-100"
+          style={{ maskImage, WebkitMaskImage: maskImage }}
         >
-          <HoverButton>
-            Lançamento em breve
-          </HoverButton>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#00E3A5]/10 to-transparent backdrop-blur-[1px]" />
+          <GridPattern offsetX={gridOffsetX} offsetY={gridOffsetY} />
         </motion.div>
-      </div>
+
+        {/* Colored Lights - Fade out when not idle */}
+        <motion.div
+          className="absolute inset-0 pointer-events-none z-0 overflow-hidden"
+          animate={{ opacity: onboardingState === 'idle' ? 1 : 0 }}
+          transition={{ duration: 1.0 }}
+        >
+          <div className="absolute right-[-20%] top-[-10%] md:right-[-10%] md:top-[-20%] w-[400px] h-[400px] md:w-[700px] md:h-[700px] rounded-full bg-[#4F46E5]/20 blur-[80px] md:blur-[140px]" />
+          <div className="absolute left-[-20%] bottom-[-10%] md:left-[-10%] md:bottom-[-20%] w-[400px] h-[400px] md:w-[700px] md:h-[700px] rounded-full bg-[#EA4B71]/15 blur-[80px] md:blur-[140px]" />
+        </motion.div>
+      </motion.div>
+
+      <AnimatePresence>
+        {onboardingState === 'idle' && (
+          <motion.div
+            className="relative z-10 flex flex-col items-center text-center px-4 max-w-5xl mx-auto pointer-events-auto"
+            exit={{ opacity: 0, scale: 0.9, filter: "blur(4px)" }}
+            transition={{ duration: 0.3 }}
+          >
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="relative w-full max-w-[600px] flex items-center justify-center select-none mb-2 md:mb-4"
+            >
+              <img
+                src="/logo-empresa.png"
+                alt="Nome da Empresa Logo"
+                className="w-full h-auto object-contain drop-shadow-2xl"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement?.classList.add('fallback-visible');
+                }}
+              />
+
+              <div className="hidden fallback-visible:flex flex-col items-center justify-center border-2 border-dashed border-white/20 rounded-xl p-12 bg-white/5 backdrop-blur-sm w-full">
+                <ImageIcon className="w-16 h-16 text-white/40 mb-4" />
+                <p className="text-white/60 font-mono text-sm">Logo não carregada</p>
+              </div>
+            </motion.div>
+
+            <div className="mt-2 max-w-[600px] mx-auto mb-10 md:mb-20">
+              <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-mono font-normal tracking-tight text-white whitespace-nowrap flex items-center justify-center gap-2 md:gap-3">
+                <Typewriter
+                  text={[
+                    "Suas vendas",
+                    "Sua operação",
+                    "Seu suporte",
+                    "Seu negócio"
+                  ]}
+                  speed={100}
+                  className="text-[#4F46E5]"
+                  waitTime={2000}
+                  deleteSpeed={50}
+                  cursorChar={"_"}
+                />
+                <span className="text-white">
+                  rodando 24 horas.
+                </span>
+              </h1>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+            >
+              <HoverButton onClick={startOnboarding}>
+                Iniciar onboarding
+              </HoverButton>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Onboarding Form - Shows after animation */}
+      <AnimatePresence>
+        {onboardingState === 'completed' && (
+          <motion.div
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className="w-full h-full md:h-auto md:max-h-[85vh] flex flex-col items-center justify-center md:p-4">
+              <OnboardingForm />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#EA4B71]/50 to-transparent" />
     </div>
