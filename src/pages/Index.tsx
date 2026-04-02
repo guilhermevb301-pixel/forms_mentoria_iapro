@@ -428,19 +428,16 @@ const InfiniteGridHero = () => {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="relative w-full max-w-[600px] flex items-center justify-center select-none mb-2 md:mb-4"
             >
-              <img
-                src="/logo-genios.png"
-                alt="Gênios da IA Logo"
-                className="w-full h-auto object-contain drop-shadow-2xl"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.parentElement?.classList.add('fallback-visible');
-                }}
-              />
-
-              <div className="hidden fallback-visible:flex flex-col items-center justify-center border-2 border-dashed border-white/20 rounded-xl p-12 bg-white/5 backdrop-blur-sm w-full">
-                <ImageIcon className="w-16 h-16 text-white/40 mb-4" />
-                <p className="text-white/60 font-mono text-sm">Logo não carregada</p>
+              <div className="flex flex-col items-center gap-3">
+                <img
+                  src="/logo-genios.png"
+                  alt="Next Era Logo"
+                  className="w-48 h-48 object-contain"
+                  style={{ mixBlendMode: 'screen' }}
+                />
+                <span className="text-3xl md:text-4xl font-bold tracking-widest text-white uppercase" style={{ letterSpacing: '0.25em' }}>
+                  Next Era
+                </span>
               </div>
             </motion.div>
 
@@ -448,10 +445,10 @@ const InfiniteGridHero = () => {
               <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-mono font-normal tracking-tight text-white whitespace-nowrap flex items-center justify-center gap-2 md:gap-3">
                 <Typewriter
                   text={[
-                    "Fature R$10k/mês",
-                    "Crie projetos de IA",
-                    "Trabalhe 14h semanais",
-                    "Sem aparecer"
+                    "Suas vendas",
+                    "Sua operação",
+                    "Seu suporte",
+                    "Seu negócio"
                   ]}
                   speed={100}
                   className="text-[#7C3AED]"
