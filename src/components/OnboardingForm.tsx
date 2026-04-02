@@ -33,7 +33,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant = "default", size = "default", children, ...props }, ref) => {
     const variants = {
-        default: "bg-[#4F46E5] text-white hover:bg-[#4F46E5]/90 shadow-[0_0_15px_-3px_rgba(79,70,229,0.4)] border border-transparent",
+        default: "bg-[#7C3AED] text-white hover:bg-[#7C3AED]/90 shadow-[0_0_15px_-3px_rgba(79,70,229,0.4)] border border-transparent",
         outline: "border border-neutral-800 bg-[#0A0A0A] hover:bg-neutral-900 text-white",
         ghost: "hover:bg-neutral-800 text-white hover:text-[#00E3A5]",
     };
@@ -47,7 +47,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(({ className, variant 
         <button
             ref={ref}
             className={cn(
-                "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-[#0A0A0A] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4F46E5] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+                "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-[#0A0A0A] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7C3AED] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
                 variants[variant],
                 sizes[size],
                 className
@@ -64,7 +64,7 @@ const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputEl
     <input
         ref={ref}
         className={cn(
-            "flex h-10 w-full rounded-md border border-neutral-800 bg-[#171717] px-3 py-2 text-sm text-white ring-offset-[#0A0A0A] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#4F46E5] focus-visible:border-[#4F46E5] disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
+            "flex h-10 w-full rounded-md border border-neutral-800 bg-[#171717] px-3 py-2 text-sm text-white ring-offset-[#0A0A0A] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#7C3AED] focus-visible:border-[#7C3AED] disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
             className
         )}
         {...props}
@@ -88,7 +88,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, React.TextareaHTMLAttributes<HT
     <textarea
         ref={ref}
         className={cn(
-            "flex min-h-[80px] w-full rounded-md border border-neutral-800 bg-[#171717] px-3 py-2 text-sm text-white ring-offset-[#0A0A0A] placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#4F46E5] focus-visible:border-[#4F46E5] disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
+            "flex min-h-[80px] w-full rounded-md border border-neutral-800 bg-[#171717] px-3 py-2 text-sm text-white ring-offset-[#0A0A0A] placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#7C3AED] focus-visible:border-[#7C3AED] disabled:cursor-not-allowed disabled:opacity-50 transition-colors",
             className
         )}
         {...props}
@@ -141,7 +141,7 @@ const SelectTrigger = React.forwardRef<HTMLButtonElement, any>(({ className, chi
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-            "flex h-10 w-full items-center justify-between rounded-md border border-neutral-800 bg-[#171717] px-3 py-2 text-sm ring-offset-[#0A0A0A] placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#4F46E5] disabled:cursor-not-allowed disabled:opacity-50 text-white",
+            "flex h-10 w-full items-center justify-between rounded-md border border-neutral-800 bg-[#171717] px-3 py-2 text-sm ring-offset-[#0A0A0A] placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-[#7C3AED] disabled:cursor-not-allowed disabled:opacity-50 text-white",
             className
         )}
         {...props}
@@ -231,10 +231,10 @@ const RadioGroupItem = React.forwardRef<HTMLButtonElement, { value: string, id: 
     return (
         <div className={cn(
             "aspect-square h-4 w-4 rounded-full border border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 border-neutral-400",
-            checked && "border-[#4F46E5]",
+            checked && "border-[#7C3AED]",
             className
         )}>
-            <div className={cn("h-full w-full rounded-full bg-[#4F46E5]",
+            <div className={cn("h-full w-full rounded-full bg-[#7C3AED]",
                 !checked && "hidden"
             )} />
         </div>
@@ -615,7 +615,7 @@ export function OnboardingForm() {
                                     className={cn(
                                         "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-all",
                                         formData.personaType === "person"
-                                            ? "border-[#4F46E5] bg-[#4F46E5]/5"
+                                            ? "border-[#7C3AED] bg-[#7C3AED]/5"
                                             : "border-neutral-800 hover:bg-[#171717]"
                                     )}
                                     onClick={() => updateFormData("personaType", "person")}
@@ -631,7 +631,7 @@ export function OnboardingForm() {
                                     className={cn(
                                         "flex items-center space-x-3 rounded-lg border p-4 cursor-pointer transition-all",
                                         formData.personaType === "assistant"
-                                            ? "border-[#4F46E5] bg-[#4F46E5]/5"
+                                            ? "border-[#7C3AED] bg-[#7C3AED]/5"
                                             : "border-neutral-800 hover:bg-[#171717]"
                                     )}
                                     onClick={() => updateFormData("personaType", "assistant")}
@@ -831,7 +831,7 @@ export function OnboardingForm() {
                                     "border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center transition-colors cursor-pointer relative",
                                     isDragging
                                         ? "border-[#00E3A5] bg-[#00E3A5]/10"
-                                        : "border-neutral-700 hover:border-[#4F46E5] bg-[#171717]/50"
+                                        : "border-neutral-700 hover:border-[#7C3AED] bg-[#171717]/50"
                                 )}
                                 onDragOver={handleDragOver}
                                 onDragLeave={handleDragLeave}
@@ -861,7 +861,7 @@ export function OnboardingForm() {
                                     {formData.files.map((file, index) => (
                                         <div key={index} className="flex items-center justify-between p-3 bg-[#171717] border border-neutral-800 rounded-lg text-sm">
                                             <div className="flex items-center gap-3 overflow-hidden">
-                                                <FileIcon className="h-4 w-4 text-[#4F46E5] shrink-0" />
+                                                <FileIcon className="h-4 w-4 text-[#7C3AED] shrink-0" />
                                                 <span className="truncate text-neutral-300">{file.name}</span>
                                                 <span className="text-xs text-neutral-500 shrink-0">({(file.size / 1024).toFixed(0)}kb)</span>
                                             </div>
@@ -968,7 +968,7 @@ export function OnboardingForm() {
                     <h3 className="text-white font-medium mb-4 pb-2 border-b border-neutral-800">O que acontece agora?</h3>
                     <ul className="space-y-6">
                         <motion.li variants={itemVariants} className="flex items-start gap-3">
-                            <FileText className="h-6 w-6 text-[#4F46E5] mt-1 shrink-0" />
+                            <FileText className="h-6 w-6 text-[#7C3AED] mt-1 shrink-0" />
                             <div>
                                 <span className="text-white font-semibold text-lg">Geração do Contrato:</span>
                                 <p className="text-neutral-400 text-sm mt-1">Você receberá o documento para assinatura no e-mail informado em instantes.</p>
@@ -976,7 +976,7 @@ export function OnboardingForm() {
                         </motion.li>
 
                         <motion.li variants={itemVariants} className="flex items-start gap-3">
-                            <Video className="h-6 w-6 text-[#4F46E5] mt-1 shrink-0" />
+                            <Video className="h-6 w-6 text-[#7C3AED] mt-1 shrink-0" />
                             <div>
                                 <span className="text-white font-semibold text-lg">Call de Alinhamento:</span>
                                 <p className="text-neutral-400 text-sm mt-1">Essa será a primeira call do projeto para recolher todos os acessos necessários para início.</p>
@@ -984,7 +984,7 @@ export function OnboardingForm() {
                         </motion.li>
 
                         <motion.li variants={itemVariants} className="flex items-start gap-3">
-                            <Bot className="h-6 w-6 text-[#4F46E5] mt-1 shrink-0" />
+                            <Bot className="h-6 w-6 text-[#7C3AED] mt-1 shrink-0" />
                             <div>
                                 <span className="text-white font-semibold text-lg">Configuração da IA:</span>
                                 <p className="text-neutral-400 text-sm mt-1">Com base nas regras que você definiu, iniciaremos o treinamento do 'cérebro' do seu assistente agora mesmo.</p>
@@ -1114,7 +1114,7 @@ export function OnboardingForm() {
                                     onClick={handleNext}
                                     disabled={!isStepValid() || isSubmitting}
                                     className={cn(
-                                        "bg-[#4F46E5] hover:bg-[#4F46E5]/90 text-white border border-transparent transition-all duration-300 shadow-[0_0_15px_rgba(79,70,229,0.5)]",
+                                        "bg-[#7C3AED] hover:bg-[#7C3AED]/90 text-white border border-transparent transition-all duration-300 shadow-[0_0_15px_rgba(79,70,229,0.5)]",
                                         (!isStepValid() || isSubmitting) && "opacity-50 cursor-not-allowed"
                                     )}
                                 >

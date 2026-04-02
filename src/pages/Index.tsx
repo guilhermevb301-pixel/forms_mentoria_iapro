@@ -409,7 +409,7 @@ const InfiniteGridHero = () => {
           animate={{ opacity: onboardingState === 'idle' ? 1 : 0 }}
           transition={{ duration: 1.0 }}
         >
-          <div className="absolute right-[-20%] top-[-10%] md:right-[-10%] md:top-[-20%] w-[400px] h-[400px] md:w-[700px] md:h-[700px] rounded-full bg-[#4F46E5]/20 blur-[80px] md:blur-[140px]" />
+          <div className="absolute right-[-20%] top-[-10%] md:right-[-10%] md:top-[-20%] w-[400px] h-[400px] md:w-[700px] md:h-[700px] rounded-full bg-[#7C3AED]/20 blur-[80px] md:blur-[140px]" />
           <div className="absolute left-[-20%] bottom-[-10%] md:left-[-10%] md:bottom-[-20%] w-[400px] h-[400px] md:w-[700px] md:h-[700px] rounded-full bg-[#EA4B71]/15 blur-[80px] md:blur-[140px]" />
         </motion.div>
       </motion.div>
@@ -429,8 +429,8 @@ const InfiniteGridHero = () => {
               className="relative w-full max-w-[600px] flex items-center justify-center select-none mb-2 md:mb-4"
             >
               <img
-                src="/logo-empresa.png"
-                alt="Nome da Empresa Logo"
+                src="/logo-genios.png"
+                alt="Gênios da IA Logo"
                 className="w-full h-auto object-contain drop-shadow-2xl"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
@@ -448,19 +448,19 @@ const InfiniteGridHero = () => {
               <h1 className="text-base sm:text-lg md:text-2xl lg:text-3xl font-mono font-normal tracking-tight text-white whitespace-nowrap flex items-center justify-center gap-2 md:gap-3">
                 <Typewriter
                   text={[
-                    "Suas vendas",
-                    "Sua operação",
-                    "Seu suporte",
-                    "Seu negócio"
+                    "Fature R$10k/mês",
+                    "Crie projetos de IA",
+                    "Trabalhe 14h semanais",
+                    "Sem aparecer"
                   ]}
                   speed={100}
-                  className="text-[#4F46E5]"
+                  className="text-[#7C3AED]"
                   waitTime={2000}
                   deleteSpeed={50}
                   cursorChar={"_"}
                 />
                 <span className="text-white">
-                  rodando 24 horas.
+                  com IA.
                 </span>
               </h1>
             </div>
@@ -471,7 +471,7 @@ const InfiniteGridHero = () => {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <HoverButton onClick={startOnboarding}>
-                Iniciar onboarding
+                Começar onboarding
               </HoverButton>
             </motion.div>
           </motion.div>
